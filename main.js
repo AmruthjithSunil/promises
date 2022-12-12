@@ -27,7 +27,6 @@ function createPost(post) {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
             post.createdAt = new Date().getTime();
-            lastEditedInMilliSeconds = new Date().getTime();
             posts.push(post);
 
             const error = false;
@@ -45,6 +44,8 @@ function deletePost() {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
             if(posts.length){
+                posts.pop();
+                getPosts();
                 resolve();
             } else {
                 reject();
@@ -57,32 +58,20 @@ createPost({ title: 'Post Three', body: 'This is post three'})
 .then(getPosts)
 .catch(err => console.log(err));
 
-deletePost().then(val => {
-    posts.pop();
-    getPosts();
-}).catch(err => console.log('Array is empty now'));
-deletePost().then(val => {
-    posts.pop();
-    getPosts();
-}).catch(err => console.log('Array is empty now'));
-deletePost().then(val => {
-    posts.pop();
-    getPosts();
-}).catch(err => console.log('Array is empty now'));
-deletePost().then(val => {
-    posts.pop();
-    getPosts();
+Promise.all([deletePost(), deletePost(), deletePost(), deletePost()])
+.then(val => {
 }).catch(err => console.log('Array is empty now'));
 
-setTimeout(() => {
-    createPost({ title: 'Post Four', body: 'This is post four'})
-    .then(getPosts)
-    .catch(err => console.log(err));
-},1000)
+function updateLastUserActivityTime(){
+    return new Promise((resolve, reject) => {
+        lastEditedInMilliSeconds = new Date().getTime();
+        resolve();
+    })
+}
 
-setTimeout(() => {
-    deletePost().then(val => {
-        posts.pop();
-        getPosts();
-    }).catch(err => console.log('Array is empty now'));
-},2000);
+Promise.all([createPost({ title: 'Post Four', body: 'This is post Four'}), updateLastUserActivityTime()])
+.then(val => console.log(posts, lastEditedInMilliSeconds));
+
+deletePost()
+.then(val => console.log(posts))
+.catch(err => console.log('Array is empty now'))
